@@ -3,6 +3,7 @@ plugins {
 	id 'war'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 	id "org.openapi.generator" version "7.14.0"
 
 }
@@ -44,6 +45,27 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.withType(Test) {
+	systemProperty 'file.encoding', 'UTF-8'
+}
+
+test.finalizedBy jacocoTestReport
+def coverageExcludeFiles = [
+	'**/com/example/restapi/generated/**',
+	'**/*$*.class',
+	'**/*$lamda$.class',
+]
+
+jacocoTestReport {
+	afterEvaluate {
+		classDirectories = files(classDirectories.files.collect {
+			fileTree(
+				dir: it,
+				exclude: coverageExcludeFiles)
+		})
+	}
 }
 
 task buildApiDoc(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
