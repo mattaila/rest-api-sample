@@ -73,18 +73,28 @@ public class TaskControllerTest {
                     new TaskEntity(2L, "test2")));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/tasks/")
-            .param("limit", "10")
-            .param("offset", "1")
+            .param("limit", "2")
+            .param("offset", "0")
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.page.limit").value(10))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.page.offset").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.page.limit").value(2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.page.offset").value(0))
             .andExpect(MockMvcResultMatchers.jsonPath("$.page.size").value(2))
             .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].id").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].title").value("test"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].id").value(2))
             .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].title").value("test2"));
-        }
+    }
+
+    @Test
+    void listTasks_ステータスコード400() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/tasks/")
+            .param("limit", "2")
+            .param("offset", "-1")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
 
     @Test
     void createTask_ステータスコード201() throws Exception {
@@ -100,6 +110,19 @@ public class TaskControllerTest {
             .andExpect(MockMvcResultMatchers.status().isCreated())
             .andExpect(MockMvcResultMatchers.jsonPath("$.id").value("1"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("title"));
+    }
+
+    @Test
+    void createTask_ステータスコード400_不正なパラメータ() throws Exception {
+
+        TaskForm taskForm = new TaskForm();
+        Mockito.when(service.create(anyString()))
+            .thenReturn(new TaskEntity(1L, "title"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/tasks/")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(taskForm)))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
