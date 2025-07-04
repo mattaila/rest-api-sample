@@ -4,6 +4,6 @@ import lombok.Value;
 
 @Value
 public class TaskEntity {
-    private long id;
+    private Long id;
     private String title;
 }
