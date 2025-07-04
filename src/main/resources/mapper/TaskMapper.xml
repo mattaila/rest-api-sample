@@ -21,6 +21,7 @@
         select
         <include refid="Base_Column_List" />
         from tasks
+        order by id asc
         limit #{limit}
         offset #{offset}
     </select>
