@@ -1,4 +1,4 @@
-![build](https://github.com/mattaila/rest-api-sample/actions/workflows/build.yml/badge.svg)
+[![build](https://github.com/mattaila/rest-api-sample/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/mattaila/rest-api-sample/actions/workflows/build.yaml)
 
 ## 使用技術
 
@@ -18,6 +18,5 @@ API ドキュメントは OpenAPI を用いて管理しています。
 - `./gradlew test` でテスト
 
 ## バッジについて
-
-- ![build](https://github.com/mattaila/rest-api-sample/actions/workflows/build.yml/badge.svg)  
+[![build](https://github.com/mattaila/rest-api-sample/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/mattaila/rest-api-sample/actions/workflows/build.yaml)
   → `main` ブランチへのプッシュで自動ビルドが実行されます。
