@@ -4,10 +4,13 @@
     <resultMap id="BaseResultMap" type="com.example.restapi.domain.task.repository.TaskRecord">
         <id column="id" jdbcType="INTEGER" property="id" />
         <result column="title" jdbcType="VARCHAR" property="title" />
+        <result column="comment" jdbcType="VARCHAR" property="comment" />
+        <result column="progress" jdbcType="INTEGER" property="progress" />
+        <result column="deadline" jdbcType="DATE" property="deadline" />
     </resultMap>
   
     <sql id="Base_Column_List">
-        id, title
+        id, title, comment, progress, deadline
     </sql>
   
     <select id="select" resultMap="BaseResultMap">
@@ -29,14 +32,25 @@
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.example.restapi.domain.task.repository.TaskRecord" useGeneratedKeys="true">
 
         insert into tasks (
-            title
+            title,
+            comment,
+            progress,
+            deadline
         ) values (
-            #{title,jdbcType=VARCHAR}
+            #{title,jdbcType=VARCHAR},
+            #{comment,jdbcType=VARCHAR},
+            #{progress,jdbcType=INTEGER},
+            #{deadline,jdbcType=DATE}
         )
     </insert>
 
     <update id="update" parameterType="com.example.restapi.domain.task.repository.TaskRecord">
-        update tasks set title = #{title} where id = #{id}
+        update tasks set 
+            title = #{title},
+            comment = #{comment},
+            progress = #{progress},
+            deadline = #{deadline}
+        where id = #{id}
     </update>
 
     <delete id="delete" parameterType="java.lang.Long">

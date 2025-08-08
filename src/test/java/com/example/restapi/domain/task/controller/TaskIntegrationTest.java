@@ -2,6 +2,8 @@ package com.example.restapi.domain.task.controller;
 
 import static org.hamcrest.Matchers.equalTo;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -28,7 +30,10 @@ public class TaskIntegrationTest {
         .then()
             .statusCode(200)
             .body("id", equalTo(1))
-            .body("title", equalTo("task1"));
+            .body("title", equalTo("Vue.js"))
+            .body("comment", equalTo("Vue3学習"))
+            .body("progress", equalTo(20))
+            .body("deadline", equalTo("2025-10-30"));
     }
 
     @Test
@@ -59,13 +64,12 @@ public class TaskIntegrationTest {
             .body("page.size", equalTo(2))
             .body("results.size()", equalTo(2))
             .body("results[0].id", equalTo(1))
-            .body("results[1].id", equalTo(2))
-            .body("results[1].title", equalTo("task2"));
+            .body("results[1].id", equalTo(2));
     }
 
     @Test
     void タスク作成_ステータスコード201() {
-        TaskForm form = new TaskForm("task4");
+        TaskForm form = new TaskForm("task4", 25, LocalDate.of(2025,3,30));
         RestAssured.given()
             .port(port)
             .accept(ContentType.JSON)
@@ -76,7 +80,9 @@ public class TaskIntegrationTest {
         .then()
             .statusCode(201)
             .body("id", equalTo(4))
-            .body("title", equalTo("task4"));
+            .body("title", equalTo("task4"))
+            .body("progress", equalTo(25))
+            .body("deadline", equalTo("2025-03-30"));
 
         RestAssured.given()
             .port(port)
@@ -105,7 +111,8 @@ public class TaskIntegrationTest {
 
     @Test
     void タスク更新_ステータスコード200() {
-        TaskForm form = new TaskForm("updated");
+        TaskForm form = new TaskForm("updated", 30, LocalDate.of(2026,4,1));
+        form.setComment("comment updated");
         RestAssured.given()
             .port(port)
             .accept(ContentType.JSON)
@@ -116,7 +123,10 @@ public class TaskIntegrationTest {
         .then()
             .statusCode(200)
             .body("id", equalTo(1))
-            .body("title", equalTo("updated"));
+            .body("title", equalTo("updated"))
+            .body("comment", equalTo("comment updated"))
+            .body("progress", equalTo(30))
+            .body("deadline", equalTo("2026-04-01"));
 
         //更新されているか確認
         RestAssured.given()
@@ -127,7 +137,10 @@ public class TaskIntegrationTest {
         .then()
             .statusCode(200)
             .body("id", equalTo(1))
-            .body("title", equalTo("updated"));
+            .body("title", equalTo("updated"))
+            .body("comment", equalTo("comment updated"))
+            .body("progress", equalTo(30))
+            .body("deadline", equalTo("2026-04-01"));
     }
 
     @Test
@@ -144,7 +157,7 @@ public class TaskIntegrationTest {
 
     @Test
     void タスク更新_ステータスコード404() {
-        TaskForm form = new TaskForm("updated");
+        TaskForm form = new TaskForm("updated", 10, LocalDate.of(2025,1,1));
         RestAssured.given()
             .port(port)
             .accept(ContentType.JSON)

@@ -4,9 +4,9 @@ import java.net.URI;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.restapi.domain.task.service.TaskEntity;
 import com.example.restapi.domain.task.service.TaskService;
 import com.example.restapi.generated.api.TasksApi;
 import com.example.restapi.generated.model.PageDTO;
@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class TaskController implements TasksApi {
 
     private final TaskService taskService;
@@ -26,14 +27,14 @@ public class TaskController implements TasksApi {
     public ResponseEntity<TaskDTO> showTask(Long taskId) {
         var entity = taskService.find(taskId);
 
-        TaskDTO dto = toTaskDTO(entity);
+        TaskDTO dto = entity.toTaskDTO();
         return ResponseEntity.ok(dto);
     }
 
     @Override
     public ResponseEntity<TaskListDTO> listTasks(Integer limit, Long offset) {
         var entityList = taskService.find(limit, offset);
-        var dtoList = entityList.stream().map(this::toTaskDTO).collect(Collectors.toList());
+        var dtoList = entityList.stream().map(entity -> entity.toTaskDTO()).collect(Collectors.toList());
 
         var pageDTO = new PageDTO();
         pageDTO.setLimit(limit);
@@ -46,17 +47,10 @@ public class TaskController implements TasksApi {
         return ResponseEntity.ok().body(dto);
     }
 
-    private TaskDTO toTaskDTO(TaskEntity entity) {
-        var taskDto = new TaskDTO();
-        taskDto.setId(entity.getId());
-        taskDto.setTitle(entity.getTitle());
-        return taskDto;
-    }
-
     @Override
     public ResponseEntity<TaskDTO> createTask(TaskForm form) {
-        var entity = taskService.create(form.getTitle());
-        var dto = toTaskDTO(entity);
+        var entity = taskService.create(form);
+        var dto = entity.toTaskDTO();
         return ResponseEntity
                 .created(URI.create("/tasks/" + dto.getId()))
                 .body(dto);
@@ -64,8 +58,8 @@ public class TaskController implements TasksApi {
 
     @Override
     public ResponseEntity<TaskDTO> updateTask(Long taskId, TaskForm taskForm) {
-        var entity = taskService.update(taskId, taskForm.getTitle());
-        var dto = toTaskDTO(entity);
+        var entity = taskService.update(taskId, taskForm);
+        var dto = entity.toTaskDTO();
         return ResponseEntity.ok(dto);
     }
 

@@ -1,10 +1,11 @@
 package com.example.restapi.domain.task.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ public class TaskControllerTest {
     @Test
     void showTask_ステータスコード200() throws Exception {
         Mockito.when(service.find(anyLong()))
-            .thenReturn(new TaskEntity(1L, "test"));
+            .thenReturn(new TaskEntity(1L, "test", "comment", 0, LocalDate.of(2025, 1, 1)));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/tasks/1")
             .accept(MediaType.APPLICATION_JSON))
@@ -69,8 +70,8 @@ public class TaskControllerTest {
     void listTasks_ステータスコード200() throws Exception {
         Mockito.when(service.find(anyInt(), anyLong()))
             .thenReturn(List.of(
-                    new TaskEntity(1L, "test"),
-                    new TaskEntity(2L, "test2")));
+                    new TaskEntity(1L, "test", "comment", 0, LocalDate.of(2025, 1, 1)),
+                    new TaskEntity(2L, "test2", "comment", 0, LocalDate.of(2025, 1, 1))));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/tasks/")
             .param("limit", "2")
@@ -101,8 +102,12 @@ public class TaskControllerTest {
 
         TaskForm taskForm = new TaskForm();
         taskForm.setTitle("title");
-        Mockito.when(service.create(anyString()))
-            .thenReturn(new TaskEntity(1L, "title"));
+        taskForm.setComment("comment");
+        taskForm.setProgress(100);
+        taskForm.setDeadline(LocalDate.of(2025, 9, 30));
+
+        Mockito.when(service.create(any()))
+            .thenReturn(new TaskEntity(1L, "title", "comment", 0, LocalDate.of(2025, 1, 1)));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/tasks/")
             .contentType(MediaType.APPLICATION_JSON)
@@ -116,8 +121,8 @@ public class TaskControllerTest {
     void createTask_ステータスコード400_不正なパラメータ() throws Exception {
 
         TaskForm taskForm = new TaskForm();
-        Mockito.when(service.create(anyString()))
-            .thenReturn(new TaskEntity(1L, "title"));
+        Mockito.when(service.create(taskForm))
+            .thenReturn(new TaskEntity(1L, "title", "comment", 0, LocalDate.of(2025, 1, 1)));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/tasks/")
             .contentType(MediaType.APPLICATION_JSON)
@@ -137,8 +142,12 @@ public class TaskControllerTest {
     void update_ステータスコード200() throws Exception {
         TaskForm taskForm = new TaskForm();
         taskForm.setTitle("title");
-        Mockito.when(service.update(anyLong(),anyString()))
-            .thenReturn(new TaskEntity(1L, "title"));
+        taskForm.setComment("comment");
+        taskForm.setProgress(100);
+        taskForm.setDeadline(LocalDate.of(2025, 9, 30));
+
+        Mockito.when(service.update(anyLong(), any()))
+            .thenReturn(new TaskEntity(1L, "title", "comment", 0, LocalDate.of(2025, 1, 1)));
 
         mockMvc.perform(MockMvcRequestBuilders.put("/tasks/1")
             .contentType(MediaType.APPLICATION_JSON)
@@ -160,8 +169,11 @@ public class TaskControllerTest {
     void updateTask_ステータスコード404() throws Exception {
         TaskForm taskForm = new TaskForm();
         taskForm.setTitle("title");
+        taskForm.setComment("comment");
+        taskForm.setProgress(100);
+        taskForm.setDeadline(LocalDate.of(2025, 9, 30));
 
-        Mockito.when(service.update(anyLong(), anyString()))
+        Mockito.when(service.update(anyLong(), any()))
             .thenThrow(new TaskEntityNotFoundException(1));
 
         //存在しないID指定

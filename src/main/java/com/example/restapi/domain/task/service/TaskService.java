@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.restapi.domain.task.repository.TaskRecord;
 import com.example.restapi.domain.task.repository.TaskRepository;
+import com.example.restapi.generated.model.TaskForm;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,26 +19,29 @@ public class TaskService {
 
     public TaskEntity find(Long taskId) {
         return taskRepository.select(taskId)
-            .map(record -> new TaskEntity(record.getId(), record.getTitle()))
+            .map(record -> new TaskEntity(record.getId(), record.getTitle(),
+                record.getComment(), record.getProgress(), record.getDeadline()))
             .orElseThrow(() -> new TaskEntityNotFoundException(taskId));
     }
 
     public List<TaskEntity> find(int limit, long offset) {
         var recordList = taskRepository.selectList(limit, offset);
         return recordList.stream().map(record -> {
-            return new TaskEntity(record.getId(), record.getTitle());
+            return new TaskEntity(record.getId(), record.getTitle(),
+                record.getComment(), record.getProgress(), record.getDeadline());
         }).collect(Collectors.toList());
     }
 
-    public TaskEntity create(String title) {
-        var record = new TaskRecord(null, title);
+    public TaskEntity create(TaskForm form) {
+        var record = new TaskRecord(null, form.getTitle(), form.getComment(), form.getProgress(), form.getDeadline());
         taskRepository.insert(record);
-        return new TaskEntity(record.getId(), record.getTitle());
+        return new TaskEntity(record.getId(), record.getTitle(),
+                record.getComment(), record.getProgress(), record.getDeadline());
     }
 
-    public TaskEntity update(Long taskId, String title) {
+    public TaskEntity update(Long taskId, TaskForm form) {
         taskRepository.select(taskId).orElseThrow(() -> new TaskEntityNotFoundException(taskId));
-        taskRepository.update(new TaskRecord(taskId, title));
+        taskRepository.update(new TaskRecord(taskId, form.getTitle(), form.getComment(), form.getProgress(), form.getDeadline()));
         return find(taskId);
     }
 
