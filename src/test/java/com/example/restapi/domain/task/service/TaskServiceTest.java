@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.example.restapi.domain.task.repository.TaskRecord;
 import com.example.restapi.domain.task.repository.TaskRepository;
+import com.example.restapi.generated.model.TaskForm;
 
 public class TaskServiceTest {
 
@@ -32,12 +34,19 @@ public class TaskServiceTest {
     private TaskRepository repository;
 
     private AutoCloseable closable;
-    private TaskRecord record = new TaskRecord(1L, "test record");
+    private TaskRecord record = new TaskRecord(1L, "test record", "comment", 0, LocalDate.of(2025, 1, 1));
     private long taskId = 1L;
+    private TaskForm form;
 
     @BeforeEach
     void setUp() {
         closable = MockitoAnnotations.openMocks(this);
+
+        form = new TaskForm();
+        form.setTitle("title");
+        form.setComment("comment");
+        form.setProgress(10);
+        form.setDeadline(LocalDate.of(2025, 1, 1));
     }
 
     @AfterEach
@@ -69,8 +78,8 @@ public class TaskServiceTest {
     void find_list() {
         Mockito.when(repository.selectList(anyInt(), anyLong()))
             .thenReturn(List.of(
-                    new TaskRecord(1L, "record1"),
-                    new TaskRecord(2L, "record2")));
+                    new TaskRecord(1L, "record1","comment", 0, LocalDate.of(2025, 1, 1)),
+                    new TaskRecord(2L, "record2", "comment", 0, LocalDate.of(2025, 1, 1))));
 
         List<TaskEntity> recordList = service.find(anyInt(), anyLong());
         assertAll(
@@ -85,21 +94,24 @@ public class TaskServiceTest {
 
     @Test
     void create() {
-        TaskEntity entity = service.create("title");
+        TaskEntity entity = service.create(form);
         verify(repository, times(1)).insert(any());
 
-        assertEquals("title", entity.getTitle());
+        assertEquals(form.getTitle(), entity.getTitle());
+        assertEquals(form.getComment(), entity.getComment());
+        assertEquals(form.getProgress(), entity.getProgress());
+        assertEquals(form.getDeadline(), entity.getDeadline());
     }
 
     @Test
     void update_レコードあり() {
-        TaskRecord updatedRecord = new TaskRecord(1L, "updated");
+        TaskRecord updatedRecord = new TaskRecord(1L, "updated","comment", 0, LocalDate.of(2025, 1, 1));
 
         Mockito.when(repository.select(anyLong()))
             .thenReturn(Optional.of(record))
             .thenReturn(Optional.of(updatedRecord));
         
-        TaskEntity actual = service.update(taskId, "updated");
+        TaskEntity actual = service.update(taskId, form);
         assertAll(
             () -> assertEquals(record.getId(), actual.getId()),
             () -> assertEquals("updated", actual.getTitle())
@@ -112,7 +124,7 @@ public class TaskServiceTest {
             .thenReturn(Optional.ofNullable(null));
         
         assertThrows(TaskEntityNotFoundException.class,
-            () -> service.update(taskId, "updated"));
+            () -> service.update(taskId, form));
     }
 
     @Test

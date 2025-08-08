@@ -194,9 +194,23 @@ components:
         title:
           type: string
           description: "タイトル"
+        comment:
+          type: string
+          description: "コメント"
+        progress:
+          type: integer
+          format: int32
+          description: "進捗度"
+        deadline:
+          type: string
+          format: date
+          description: "締め切り日"
+
       required:
         - id
         - title
+        - progress
+        - deadline
     TaskListDTO:
       description: "タスクのリスト"
       type: object
@@ -218,8 +232,22 @@ components:
           description: "作成されるタスクのタイトル"
           maxLength: 256
           minLength: 1
+        comment:
+          type: string
+          description: "コメント"
+          maxLength: 300
+        progress:
+          type: integer
+          format: int32
+          description: "進捗"
+        deadline:
+          type: string
+          format: date
+          description: "締め切り日"
       required:
         - title
+        - progress
+        - deadline
     ResourceNotFoundError:
       description: "指定リソースが存在しない"
       type: object
